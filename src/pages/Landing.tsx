@@ -23,12 +23,22 @@ export default function Landing() {
 
   return (
     <div className="fixed inset-0 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <img src={bgNight} alt="" aria-hidden className="w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse at center, rgba(0,0,18,0.42) 0%, rgba(0,0,8,0.78) 100%)'
-        }} />
+      {/* Background video — Pexels clip, with the original night image as a poster/fallback */}
+      <div className="absolute inset-0 bg-background">
+        <video
+          className="h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={bgNight}
+          aria-hidden="true"
+        >
+          <source src="https://videos.pexels.com/video-files/3129595/3129595-hd_1920_1080_25fps.mp4" type="video/mp4" />
+        </video>
+        <img src={bgNight} alt="" aria-hidden className="absolute inset-0 -z-10 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-[rgba(4,4,14,0.64)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(8,8,28,0.15),rgba(4,4,14,0.78))]" />
       </div>
 
       {/* Twinkling stars overlay */}
@@ -56,7 +66,7 @@ export default function Landing() {
 
         {/* Logo */}
         <h1 className="font-serif text-5xl sm:text-7xl text-[#f0ebe0] tracking-wide font-medium mb-3">
-          PikPuk
+          Scruttin
         </h1>
 
         {/* Tagline */}

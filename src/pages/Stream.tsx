@@ -175,7 +175,7 @@ export default function Stream() {
       tabIndex={0}
       style={{ outline: 'none' }}
       role="main"
-      aria-label="PikPuk Stream"
+      aria-label="Scruttin Stream"
     >
       <BackgroundLayer atmosphere={atmosphere} />
 
