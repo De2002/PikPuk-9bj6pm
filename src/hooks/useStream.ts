@@ -1,7 +1,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Moment } from '@/types';
-import { MOCK_MOMENTS } from '@/constants/mockMoments';
 import { fetchMoments, markImpression } from '@/lib/api';
 import { shuffle } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -10,7 +9,7 @@ const BUFFER_SIZE = 8;
 const REFETCH_THRESHOLD = 3;
 
 export function useStream(viewerId: string | null) {
-  const [queue, setQueue]           = useState<Moment[]>(() => shuffle([...MOCK_MOMENTS]));
+  const [queue, setQueue]           = useState<Moment[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading]       = useState(false);
   const fetchedRef                  = useRef(false);

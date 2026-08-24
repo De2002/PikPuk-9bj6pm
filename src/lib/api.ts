@@ -1,12 +1,11 @@
 import { supabase } from './supabase';
 import { Moment, UserSettings } from '@/types';
-import { MOCK_MOMENTS } from '@/constants/mockMoments';
 
 // ── Moments ──────────────────────────────────────────────────────────────────
 
 /**
  * Fetch a batch of moments the viewer hasn't seen yet.
- * Falls back to mock data for anonymous viewers.
+ * Returns only approved moments from the connected database; anonymous viewers can still browse public moments.
  */
 export async function fetchMoments(
   viewerId: string | null,
@@ -23,10 +22,12 @@ export async function fetchMoments(
 
   const { data, error } = await query;
 
-  if (error || !data || data.length === 0) {
-    console.log('[api] fetchMoments fallback to mock data', error?.message);
-    return MOCK_MOMENTS;
+  if (error) {
+    console.log('[api] fetchMoments database error', error.message);
+    return [];
   }
+
+  if (!data || data.length === 0) return [];
 
   // Filter out already-served moments for authenticated viewers
   let rows = data as unknown as Array<{

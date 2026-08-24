@@ -12,7 +12,8 @@ interface Props {
   userAvatar?: string;
 }
 
-const MAX = 500;
+// Keep text generous enough for a complete 60-second thought; audio is independent of this limit.
+const MAX = 2000;
 
 export default function Composer({ onClose, onSubmit, userAvatar }: Props) {
   const [step, setStep] = useState<'type' | 'write'>('type');
