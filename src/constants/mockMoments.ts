@@ -1,0 +1,201 @@
+import { Moment } from '@/types';
+
+const AVATARS = [
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
+];
+
+const av = (i: number) => AVATARS[i % AVATARS.length];
+
+export const MOCK_MOMENTS: Moment[] = [
+  {
+    id: 'dm-001',
+    type: 'dream',
+    body: 'I dreamed my childhood house had another floor that nobody remembered. The stairs were hidden behind the bookcase.',
+    avatarUrl: av(0),
+  },
+  {
+    id: 'th-001',
+    type: 'thought',
+    body: 'Somewhere there\'s probably a person who remembers a conversation I\'ve completely forgotten.',
+    avatarUrl: av(1),
+  },
+  {
+    id: 'dm-002',
+    type: 'dream',
+    body: 'I was in a city where everyone spoke a language I almost understood. Every word felt one step from familiar.',
+    avatarUrl: av(2),
+  },
+  {
+    id: 'th-002',
+    type: 'thought',
+    body: 'Every building you walk past is someone\'s entire world for eight hours a day.',
+    avatarUrl: av(3),
+  },
+  {
+    id: 'dm-003',
+    type: 'dream',
+    body: 'There was a library in my dream with books about things that hadn\'t happened yet. I wasn\'t allowed to open them.',
+    avatarUrl: av(4),
+  },
+  {
+    id: 'th-003',
+    type: 'thought',
+    body: 'I wonder if the version of me that lives in other people\'s memories is better or worse than the actual me.',
+    avatarUrl: av(5),
+  },
+  {
+    id: 'th-004',
+    type: 'thought',
+    body: 'We use the word "just" to make things sound smaller than they are. Just a feeling. Just a thought. Just a phase.',
+    avatarUrl: av(6),
+  },
+  {
+    id: 'dm-004',
+    type: 'dream',
+    body: 'I could fly in my dream, but only just above the telephone poles. Low enough to wave at people below.',
+    avatarUrl: av(7),
+  },
+  {
+    id: 'th-005',
+    type: 'thought',
+    body: 'At some point you\'ve already had your last conversation with someone, without knowing it was the last one.',
+    avatarUrl: av(8),
+  },
+  {
+    id: 'dm-005',
+    type: 'dream',
+    body: 'I dreamed my grandmother was still alive and we were making bread together in a kitchen that doesn\'t exist. It smelled completely real.',
+    avatarUrl: av(9),
+  },
+  {
+    id: 'th-006',
+    type: 'thought',
+    body: 'The kindest thing you can do is remember someone\'s name when they assumed you\'d already forgotten.',
+    avatarUrl: av(10),
+  },
+  {
+    id: 'dm-006',
+    type: 'dream',
+    body: 'I dreamed everyone disappeared except the dogs. They seemed completely fine about it.',
+    avatarUrl: av(11),
+  },
+  {
+    id: 'th-007',
+    type: 'thought',
+    body: 'Somewhere right now it\'s someone\'s happiest day. And they probably don\'t even realize it yet.',
+    avatarUrl: av(0),
+  },
+  {
+    id: 'th-008',
+    type: 'thought',
+    body: 'We all have a piece of music that belongs entirely to one specific moment in our past.',
+    avatarUrl: av(1),
+  },
+  {
+    id: 'dm-007',
+    type: 'dream',
+    body: 'There was a train that passed through every city at once. I watched all of them from the window at the same time.',
+    avatarUrl: av(2),
+  },
+  {
+    id: 'th-009',
+    type: 'thought',
+    body: 'A stranger held a door open for me years ago and I still think about it sometimes.',
+    avatarUrl: av(3),
+  },
+  {
+    id: 'dm-008',
+    type: 'dream',
+    body: 'I found a door behind my closet that opened onto a field I\'d never seen. The grass was the wrong color. I went in anyway.',
+    avatarUrl: av(4),
+  },
+  {
+    id: 'th-010',
+    type: 'thought',
+    body: 'You\'ve already heard the last song that will truly surprise you. You just don\'t know which one it was.',
+    avatarUrl: av(5),
+  },
+  {
+    id: 'th-011',
+    type: 'thought',
+    body: 'I spent twenty minutes looking for something. It was in my hand the whole time.',
+    avatarUrl: av(6),
+  },
+  {
+    id: 'dm-009',
+    type: 'dream',
+    body: 'I was late for something important but couldn\'t remember what. Everyone around me was very calm about it.',
+    avatarUrl: av(7),
+  },
+  {
+    id: 'th-012',
+    type: 'thought',
+    body: 'The word "melancholy" has always felt too beautiful for what it actually describes.',
+    avatarUrl: av(8),
+  },
+  {
+    id: 'dm-010',
+    type: 'dream',
+    body: 'I was standing in the ocean at night. The water was warm. There was music coming from somewhere I couldn\'t find.',
+    avatarUrl: av(9),
+  },
+  {
+    id: 'th-013',
+    type: 'thought',
+    body: 'Everything feels smaller when you look at it from above. Problems too, I think.',
+    avatarUrl: av(10),
+  },
+  {
+    id: 'th-014',
+    type: 'thought',
+    body: 'Someone, somewhere, is hearing their favorite song for the very first time right now.',
+    avatarUrl: av(11),
+  },
+  {
+    id: 'dm-011',
+    type: 'dream',
+    body: 'I was reading a letter in my dream but couldn\'t make out a single word. I kept reading it anyway.',
+    avatarUrl: av(0),
+  },
+  {
+    id: 'th-015',
+    type: 'thought',
+    body: 'There\'s a version of every conversation where everyone said what they actually meant.',
+    avatarUrl: av(1),
+  },
+  {
+    id: 'dm-012',
+    type: 'dream',
+    body: 'My dream had no story. Just a color I\'ve never seen before. I woke up trying to hold onto it.',
+    avatarUrl: av(2),
+  },
+  {
+    id: 'th-016',
+    type: 'thought',
+    body: 'The light from distant stars left before I was born. Every night sky is a view into the past.',
+    avatarUrl: av(3),
+  },
+  {
+    id: 'dm-013',
+    type: 'dream',
+    body: 'There was a map in my dream of every place I\'d ever been. Some places on it I didn\'t recognize at all.',
+    avatarUrl: av(4),
+  },
+  {
+    id: 'th-017',
+    type: 'thought',
+    body: 'I think some people stay strangers on purpose. Like they know something about connection that the rest of us don\'t.',
+    avatarUrl: av(5),
+  },
+];
