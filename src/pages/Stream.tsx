@@ -15,7 +15,6 @@ import CarouselDisplay from '@/components/features/CarouselDisplay';
 import DusterDisplay from '@/components/features/DusterDisplay';
 import Composer from '@/components/features/Composer';
 import AuthModal from '@/components/features/AuthModal';
-import ReportModal from '@/components/features/ReportModal';
 import Settings from '@/components/features/Settings';
 import AtmospherePanel from '@/components/features/AtmospherePanel';
 import DisplayPanel from '@/components/features/DisplayPanel';
@@ -26,7 +25,7 @@ type Modal = 'none' | 'composer' | 'auth' | 'settings' | 'atmosphere' | 'display
 
 export default function Stream() {
   const { user, loading: authLoading, sendOtp, verifyOtp, signOut, updateSettings, updateAvatar } = useAuth();
-  const { currentMoment, nextMoment, addMoment, neighbours } = useStream(user?.id ?? null);
+  const { currentMoment, nextMoment, passAndSkip, addMoment, neighbours } = useStream(user?.id ?? null);
   const { atmosphere, setAtmosphere } = useAtmosphere();
   const { displayId, setDisplay } = useDisplay();
 
@@ -34,10 +33,10 @@ export default function Stream() {
   const [isPinned, setIsPinned]           = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [modal, setModal]                 = useState<Modal>('none');
-  const [reportId, setReportId]           = useState<string | null>(null);
+  // Report functionality removed from stream view — available via admin
+  // const [reportId, setReportId] = useState<string | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [volume, setVolume]               = useState(0.5);
-  /** Voice note duration (ms) for current moment — triggers reading-timer recalc when it arrives */
   const [voiceDurationMs, setVoiceDurationMs] = useState(0);
 
   const phaseRef  = useRef<ReturnType<typeof setTimeout>>();
@@ -45,31 +44,26 @@ export default function Stream() {
   const pinnedRef = useRef(isPinned);
   pinnedRef.current = isPinned;
 
-  // Reset voice duration whenever the moment changes
   useEffect(() => { setVoiceDurationMs(0); }, [currentMoment?.id]);
 
   const handleAudioDuration = useCallback((seconds: number) => {
-    // Store with a small 600ms tail so the moment doesn't cut off right as audio ends
     setVoiceDurationMs(seconds * 1000 + 600);
   }, []);
 
-  // Sync volume from user settings
   useEffect(() => { if (user) setVolume(user.settings.volume); }, [user?.id, user?.settings.volume]);
 
   // ── Stream phase state machine ────────────────────────────────────────────
-  // When pinned, we simply don't schedule the next timer — the moment stays.
   useEffect(() => {
     if (!currentMoment) return;
-    if (isPinned) return; // frozen while pinned
+    if (isPinned) return;
     clearTimeout(phaseRef.current);
 
     if (phase === 'gap') {
-      phaseRef.current = setTimeout(() => setPhase('entering'), 2600);
+      phaseRef.current = setTimeout(() => setPhase('entering'), 2400);
     } else if (phase === 'entering') {
       phaseRef.current = setTimeout(() => setPhase('reading'), 850);
     } else if (phase === 'reading') {
       const textDur = calcReadingTime(currentMoment.body);
-      // If a voice note duration is known, use the longer of the two
       const dur = voiceDurationMs > 0 ? Math.max(voiceDurationMs, textDur) : textDur;
       phaseRef.current = setTimeout(() => setPhase('leaving'), dur);
     } else if (phase === 'leaving') {
@@ -78,9 +72,15 @@ export default function Stream() {
     return () => clearTimeout(phaseRef.current);
   }, [phase, currentMoment?.id, currentMoment?.body, isPinned, nextMoment, voiceDurationMs]);
 
+  // ── Pass immediately — skip current + permanent hide ─────────────────────
+  const handlePass = useCallback(() => {
+    clearTimeout(phaseRef.current);
+    setIsPinned(false);
+    passAndSkip().then(() => setPhase('gap'));
+  }, [passAndSkip]);
+
   // ── Pin / Let go ──────────────────────────────────────────────────────────
   const handlePin = useCallback(() => {
-    // Can only pin during reading phase
     if (phase !== 'reading') return;
     clearTimeout(phaseRef.current);
     setIsPinned(true);
@@ -88,7 +88,6 @@ export default function Stream() {
 
   const handleLetGo = useCallback(() => {
     setIsPinned(false);
-    // Skip whatever would have been next — go straight to leaving then rejoin fresh
     setPhase('leaving');
   }, []);
 
@@ -101,7 +100,7 @@ export default function Stream() {
 
   useEffect(() => { resetIdle(); return () => clearTimeout(idleRef.current); }, [resetIdle]);
 
-  // ── Audio — Deep Focus plays universally; atmosphere never changes the track ─
+  // ── Audio ─────────────────────────────────────────────────────────────────
   const handleToggleAudio = useCallback(() => {
     audioEngine.setVolume(volume);
     audioEngine.toggle();
@@ -117,13 +116,21 @@ export default function Stream() {
   // ── Compose ───────────────────────────────────────────────────────────────
   const handleCompose = () => setModal(user ? 'composer' : 'auth');
 
-  const handleSubmit = async (data: { type: any; body: string; polaroidFile?: File; audioFile?: File }) => {
+  const handleSubmit = async (data: {
+    type: any; body: string; title?: string;
+    authorName?: string; websiteUrl?: string; space?: any;
+    polaroidFile?: File; audioFile?: File;
+  }) => {
     if (!user) { setModal('auth'); return; }
     try {
       const moment = await createMoment({
         userId: user.id,
         type: data.type,
         body: data.body,
+        title: data.title,
+        authorName: data.authorName,
+        websiteUrl: data.websiteUrl,
+        space: data.space ?? 'general',
         polaroidFile: data.polaroidFile,
         audioFile: data.audioFile,
         avatarUrl: user.avatarUrl ?? `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face`,
@@ -150,7 +157,6 @@ export default function Stream() {
   const autoPlayVoice = user?.settings.autoPlayVoice ?? false;
   const [prevNeighbour, nextNeighbour] = neighbours;
 
-  // Shared props for Film/Carousel
   const displayProps = {
     moment: currentMoment!,
     phase,
@@ -158,9 +164,10 @@ export default function Stream() {
     isPinned,
     enableVoiceAudio,
     autoPlayVoice,
-    onReport: () => setReportId(currentMoment!.id),
+    onPass: handlePass,
     onPin: handlePin,
     onLetGo: handleLetGo,
+    // onReport: () => setReportId(currentMoment!.id),
     neighbours: [prevNeighbour, nextNeighbour] as [typeof prevNeighbour, typeof nextNeighbour],
   };
 
@@ -195,7 +202,7 @@ export default function Stream() {
           isPinned={isPinned}
           enableVoiceAudio={enableVoiceAudio}
           autoPlayVoice={autoPlayVoice}
-          onReport={() => setReportId(currentMoment.id)}
+          onPass={handlePass}
           onPin={handlePin}
           onLetGo={handleLetGo}
           onAudioDuration={handleAudioDuration}
@@ -216,7 +223,7 @@ export default function Stream() {
           isPinned={isPinned}
           enableVoiceAudio={enableVoiceAudio}
           autoPlayVoice={autoPlayVoice}
-          onReport={() => setReportId(currentMoment.id)}
+          onPass={handlePass}
           onPin={handlePin}
           onLetGo={handleLetGo}
         />
@@ -238,7 +245,12 @@ export default function Stream() {
 
       {/* ── Modals ── */}
       {modal === 'composer' && (
-        <Composer onClose={() => setModal('none')} onSubmit={handleSubmit} userAvatar={user?.avatarUrl} />
+        <Composer
+          onClose={() => setModal('none')}
+          onSubmit={handleSubmit}
+          userAvatar={user?.avatarUrl}
+          userName={user?.email?.split('@')[0]}
+        />
       )}
       {modal === 'auth' && (
         <AuthModal onClose={() => setModal('none')} onSendOtp={sendOtp} onVerifyOtp={handleVerifyOtp} />
@@ -261,9 +273,7 @@ export default function Stream() {
       {modal === 'display' && (
         <DisplayPanel current={displayId} onSelect={setDisplay} onClose={() => setModal('none')} />
       )}
-      {reportId && (
-        <ReportModal momentId={reportId} reporterId={user?.id ?? null} onClose={() => setReportId(null)} />
-      )}
+
     </div>
   );
 }

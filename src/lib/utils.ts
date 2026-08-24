@@ -11,7 +11,8 @@ export function calcReadingTime(text: string): number {
   const readMs = Math.ceil((words / wpm) * 60000);
   const base = 3000;
   const buffer = 2200;
-  return Math.min(Math.max(base + readMs + buffer, 6500), 22000);
+  // Allow up to 75 seconds for long 300-word pieces
+  return Math.min(Math.max(base + readMs + buffer, 6500), 75000);
 }
 
 export function shuffle<T>(arr: T[]): T[] {

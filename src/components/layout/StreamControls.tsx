@@ -50,7 +50,7 @@ export default function StreamControls({
 
         {/* Brand wordmark */}
         <span className="font-serif text-[#f0ebe0]/38 text-sm tracking-[0.35em] uppercase select-none pointer-events-none">
-          scruttin
+          pikpuk
         </span>
 
         <div className="flex items-center gap-1.5">

@@ -172,7 +172,7 @@ export default function Admin() {
           <ArrowLeft size={17} />
         </button>
         <div>
-          <h1 className="text-[#f0ebe0] font-semibold tracking-wide">Scruttin Admin</h1>
+          <h1 className="text-[#f0ebe0] font-semibold tracking-wide">PikPuk Admin</h1>
           <p className="text-white/35 text-xs">{user.email}</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -368,7 +368,7 @@ export default function Admin() {
 
         {/* Footer note */}
         <p className="text-center text-white/18 text-xs pb-6 leading-relaxed">
-          The active track plays site-wide for all Scruttin users.<br />
+          The active track plays site-wide for all PikPuk users.<br />
           Switching tracks takes effect within a few seconds.
         </p>
       </div>

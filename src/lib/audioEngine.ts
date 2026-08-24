@@ -45,7 +45,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-class ScruttinAudioEngine {
+class PikPukAudioEngine {
   private musicEl: HTMLAudioElement | null = null;
   private musicLoading = false;
 
@@ -162,4 +162,4 @@ class ScruttinAudioEngine {
   }
 }
 
-export const audioEngine = new ScruttinAudioEngine();
+export const audioEngine = new PikPukAudioEngine();

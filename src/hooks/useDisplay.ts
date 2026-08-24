@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { DisplayId } from '@/types';
 
-const KEY = 'scruttin_display';
+const KEY = 'pikpuk_display';
 const DEFAULT: DisplayId = 'float';
 
 function load(): DisplayId {

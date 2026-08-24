@@ -6,10 +6,31 @@ export type BgStyle = 'image' | 'rain' | 'dawn' | 'clouds' | 'city';
 export type TextSize = 'sm' | 'md' | 'lg';
 export type DisplayId = 'float' | 'film' | 'carousel' | 'duster';
 
+export const SPACES = [
+  { id: 'general',   label: 'General' },
+  { id: 'tech',      label: 'Tech' },
+  { id: 'life',      label: 'Life' },
+  { id: 'art',       label: 'Art' },
+  { id: 'science',   label: 'Science' },
+  { id: 'music',     label: 'Music' },
+  { id: 'food',      label: 'Food' },
+  { id: 'travel',    label: 'Travel' },
+  { id: 'health',    label: 'Health' },
+  { id: 'nature',    label: 'Nature' },
+  { id: 'business',  label: 'Business' },
+  { id: 'education', label: 'Education' },
+] as const;
+
+export type SpaceId = typeof SPACES[number]['id'];
+
 export interface Moment {
   id: string;
   type: MomentType;
   body: string;
+  title?: string;
+  authorName?: string;
+  websiteUrl?: string;
+  space: SpaceId;
   polaroidUrl?: string;
   audioUrl?: string;
   avatarUrl: string;

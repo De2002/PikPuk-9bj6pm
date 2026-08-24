@@ -14,7 +14,7 @@ export async function fetchMoments(
   // Build base query — approved active moments
   let query = supabase
     .from('moments')
-    .select('id, type, body, polaroid_url, audio_url, user_id, user_profiles!inner(avatar_url)')
+    .select('id, type, body, title, author_name, website_url, space, polaroid_url, audio_url, user_id, user_profiles!inner(avatar_url)')
     .eq('moderation_status', 'approved')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -34,6 +34,10 @@ export async function fetchMoments(
     id: string;
     type: 'dream' | 'thought';
     body: string;
+    title: string | null;
+    author_name: string | null;
+    website_url: string | null;
+    space: string | null;
     polaroid_url: string | null;
     audio_url: string | null;
     user_id: string;
@@ -62,6 +66,10 @@ export async function fetchMoments(
     id: r.id,
     type: r.type,
     body: r.body,
+    title: r.title ?? undefined,
+    authorName: r.author_name ?? undefined,
+    websiteUrl: r.website_url ?? undefined,
+    space: (r.space ?? 'general') as import('@/types').SpaceId,
     polaroidUrl: r.polaroid_url ?? undefined,
     audioUrl: r.audio_url ?? undefined,
     avatarUrl: (r.user_profiles as { avatar_url: string | null } | null)?.avatar_url ?? defaultAvatar,
@@ -77,11 +85,25 @@ export async function markImpression(viewerId: string, momentId: string) {
   if (error) console.log('[api] markImpression error', error.message);
 }
 
+/** Permanently pass on a moment (mark as served so it never appears again) */
+export async function passOnMoment(viewerId: string | null, momentId: string): Promise<void> {
+  if (!viewerId) return;
+  const { error } = await supabase.from('impressions').upsert(
+    { viewer_id: viewerId, moment_id: momentId, completed_at: new Date().toISOString() },
+    { onConflict: 'viewer_id,moment_id' }
+  );
+  if (error) console.log('[api] passOnMoment error', error.message);
+}
+
 /** Insert a new moment. Returns the created moment row. */
 export async function createMoment(params: {
   userId: string;
   type: 'dream' | 'thought';
   body: string;
+  title?: string;
+  authorName?: string;
+  websiteUrl?: string;
+  space?: string;
   polaroidFile?: File;
   audioFile?: File;
   avatarUrl: string;
@@ -123,13 +145,17 @@ export async function createMoment(params: {
       user_id: params.userId,
       type: params.type,
       body: params.body,
+      title: params.title ?? null,
+      author_name: params.authorName ?? null,
+      website_url: params.websiteUrl ?? null,
+      space: params.space ?? 'general',
       polaroid_url: polaroid_url ?? null,
       audio_url: audio_url ?? null,
       language: 'en',
       moderation_status: 'approved',
       status: 'active',
     })
-    .select('id, type, body, polaroid_url, audio_url')
+    .select('id, type, body, title, author_name, website_url, space, polaroid_url, audio_url')
     .single();
 
   if (error || !data) {
@@ -141,6 +167,10 @@ export async function createMoment(params: {
     id: data.id,
     type: data.type,
     body: data.body,
+    title: data.title ?? undefined,
+    authorName: data.author_name ?? undefined,
+    websiteUrl: data.website_url ?? undefined,
+    space: (data.space ?? 'general') as import('@/types').SpaceId,
     polaroidUrl: data.polaroid_url ?? undefined,
     audioUrl: data.audio_url ?? undefined,
     avatarUrl: params.avatarUrl,

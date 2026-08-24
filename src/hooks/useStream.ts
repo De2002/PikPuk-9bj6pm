@@ -1,7 +1,6 @@
-
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Moment } from '@/types';
-import { fetchMoments, markImpression } from '@/lib/api';
+import { Moment, SpaceId } from '@/types';
+import { fetchMoments, markImpression, passOnMoment } from '@/lib/api';
 import { shuffle } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
@@ -26,16 +25,14 @@ export function useStream(viewerId: string | null) {
       if (moments.length > 0) { setQueue(shuffle(moments)); setCurrentIndex(0); }
       setLoading(false);
     });
-  }, [viewerId, setQueue]); // Add setQueue to dependencies, or consider if this effect should only run once without it
+  }, [viewerId]);
 
-  const safeIndex     = queue.length > 0 ? currentIndex % queue.length : 0;
+  const safeIndex = queue.length > 0 ? currentIndex % queue.length : 0;
   const currentMoment: Moment | null = queue[safeIndex] ?? null;
 
-  // Neighbours for Film/Carousel ghost frames — never readable, just for visual
   const prevMoment: Moment | null = queue.length > 1 ? queue[(safeIndex - 1 + queue.length) % queue.length] : null;
   const nextMomentPeek: Moment | null = queue.length > 1 ? queue[(safeIndex + 1) % queue.length] : null;
 
-  // Prefetch more when buffer is running low
   const maybePrefetch = useCallback(async () => {
     const remaining = queue.length - currentIndex - 1;
     if (remaining <= REFETCH_THRESHOLD && !loading) {
@@ -48,14 +45,22 @@ export function useStream(viewerId: string | null) {
         });
       }
     }
-  }, [queue.length, currentIndex, loading, setQueue]);
+  }, [queue.length, currentIndex, loading]);
 
   const nextMoment = useCallback(() => {
     const cur = queue[safeIndex];
     if (cur && viewerIdRef.current) markImpression(viewerIdRef.current, cur.id);
     setCurrentIndex(n => n + 1);
     maybePrefetch();
-  }, [safeIndex, queue, maybePrefetch, setCurrentIndex]);
+  }, [safeIndex, queue, maybePrefetch]);
+
+  /** Pass: permanently hide this moment from this viewer, skip immediately */
+  const passAndSkip = useCallback(async () => {
+    const cur = queue[safeIndex];
+    if (cur) await passOnMoment(viewerIdRef.current, cur.id);
+    setCurrentIndex(n => n + 1);
+    maybePrefetch();
+  }, [safeIndex, queue, maybePrefetch]);
 
   const addMoment = useCallback((moment: Moment) => {
     setQueue(prev => {
@@ -64,17 +69,18 @@ export function useStream(viewerId: string | null) {
       copy.splice(insertAt, 0, moment);
       return copy;
     });
-  }, [currentIndex, setQueue]);
+  }, [currentIndex]);
 
-  // Realtime: new moments from other users append to end of queue
+  // Realtime: new moments from other users
   useEffect(() => {
     const channel = makeRealtimeChannel(setQueue);
     return () => { channel.unsubscribe(); };
-  }, [setQueue]);
+  }, []);
 
   return {
     currentMoment,
     nextMoment,
+    passAndSkip,
     addMoment,
     loading,
     neighbours: [prevMoment, nextMomentPeek] as [Moment | null, Moment | null],
@@ -93,15 +99,22 @@ function makeRealtimeChannel(setQueue: React.Dispatch<React.SetStateAction<Momen
       async (payload) => {
         const row = payload.new as {
           id: string; type: 'dream' | 'thought'; body: string;
-          polaroid_url: string | null; user_id: string;
+          title: string | null; author_name: string | null;
+          website_url: string | null; space: string | null;
+          polaroid_url: string | null; audio_url: string | null;
+          user_id: string;
         };
         const { data: profile } = await supabase
           .from('user_profiles').select('avatar_url').eq('id', row.user_id).single();
 
         const moment: Moment = {
           id: row.id, type: row.type, body: row.body,
+          title: row.title ?? undefined,
+          authorName: row.author_name ?? undefined,
+          websiteUrl: row.website_url ?? undefined,
+          space: (row.space ?? 'general') as SpaceId,
           polaroidUrl: row.polaroid_url ?? undefined,
-          audioUrl: (row as unknown as { audio_url?: string }).audio_url ?? undefined,
+          audioUrl: row.audio_url ?? undefined,
           avatarUrl: (profile as { avatar_url: string | null } | null)?.avatar_url ?? defaultAvatar,
         };
         setQueue(prev => prev.some(m => m.id === moment.id) ? prev : [...prev, moment]);

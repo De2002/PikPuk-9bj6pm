@@ -62,7 +62,7 @@ export default function AuthModal({ onClose, onSendOtp, onVerifyOtp }: Props) {
           </div>
         ) : step === 'email' ? (
           <>
-            <h2 className="font-serif text-2xl text-[#f0ebe0] mb-1">Join Scruttin</h2>
+            <h2 className="font-serif text-2xl text-[#f0ebe0] mb-1">Join PikPuk</h2>
             <p className="text-sm text-white/38 mb-7">Enter your email — we'll send a code.</p>
 
             <form onSubmit={handleSendOtp} className="space-y-4">
