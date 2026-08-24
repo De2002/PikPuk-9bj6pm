@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Atmosphere, AtmosphereId } from '@/types';
 import { getAtmosphere, DEFAULT_ATMOSPHERE_ID } from '@/constants/atmospheres';
 
-const KEY = 'pikpuk_atm';
+const KEY = 'scruttin_atm';
 
 function loadId(): AtmosphereId {
   try {
